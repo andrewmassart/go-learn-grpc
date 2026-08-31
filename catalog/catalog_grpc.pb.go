@@ -19,7 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CatalogService_GetProduct_FullMethodName = "/catalog.CatalogService/GetProduct"
+	CatalogService_GetProduct_FullMethodName      = "/catalog.CatalogService/GetProduct"
+	CatalogService_ListProducts_FullMethodName    = "/catalog.CatalogService/ListProducts"
+	CatalogService_UpdateInventory_FullMethodName = "/catalog.CatalogService/UpdateInventory"
+	CatalogService_CheckStock_FullMethodName      = "/catalog.CatalogService/CheckStock"
 )
 
 // CatalogServiceClient is the client API for CatalogService service.
@@ -27,6 +30,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CatalogServiceClient interface {
 	GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error)
+	ListProducts(ctx context.Context, in *ListProductsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ListProductsResponse], error)
+	UpdateInventory(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateInventoryRequest, UpdateInventoryResponse], error)
+	CheckStock(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[CheckStockRequest, CheckStockResponse], error)
 }
 
 type catalogServiceClient struct {
@@ -47,11 +53,59 @@ func (c *catalogServiceClient) GetProduct(ctx context.Context, in *GetProductReq
 	return out, nil
 }
 
+func (c *catalogServiceClient) ListProducts(ctx context.Context, in *ListProductsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ListProductsResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &CatalogService_ServiceDesc.Streams[0], CatalogService_ListProducts_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[ListProductsRequest, ListProductsResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CatalogService_ListProductsClient = grpc.ServerStreamingClient[ListProductsResponse]
+
+func (c *catalogServiceClient) UpdateInventory(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateInventoryRequest, UpdateInventoryResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &CatalogService_ServiceDesc.Streams[1], CatalogService_UpdateInventory_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[UpdateInventoryRequest, UpdateInventoryResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CatalogService_UpdateInventoryClient = grpc.ClientStreamingClient[UpdateInventoryRequest, UpdateInventoryResponse]
+
+func (c *catalogServiceClient) CheckStock(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[CheckStockRequest, CheckStockResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &CatalogService_ServiceDesc.Streams[2], CatalogService_CheckStock_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[CheckStockRequest, CheckStockResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CatalogService_CheckStockClient = grpc.BidiStreamingClient[CheckStockRequest, CheckStockResponse]
+
 // CatalogServiceServer is the server API for CatalogService service.
 // All implementations must embed UnimplementedCatalogServiceServer
 // for forward compatibility.
 type CatalogServiceServer interface {
 	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
+	ListProducts(*ListProductsRequest, grpc.ServerStreamingServer[ListProductsResponse]) error
+	UpdateInventory(grpc.ClientStreamingServer[UpdateInventoryRequest, UpdateInventoryResponse]) error
+	CheckStock(grpc.BidiStreamingServer[CheckStockRequest, CheckStockResponse]) error
 	mustEmbedUnimplementedCatalogServiceServer()
 }
 
@@ -64,6 +118,15 @@ type UnimplementedCatalogServiceServer struct{}
 
 func (UnimplementedCatalogServiceServer) GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetProduct not implemented")
+}
+func (UnimplementedCatalogServiceServer) ListProducts(*ListProductsRequest, grpc.ServerStreamingServer[ListProductsResponse]) error {
+	return status.Error(codes.Unimplemented, "method ListProducts not implemented")
+}
+func (UnimplementedCatalogServiceServer) UpdateInventory(grpc.ClientStreamingServer[UpdateInventoryRequest, UpdateInventoryResponse]) error {
+	return status.Error(codes.Unimplemented, "method UpdateInventory not implemented")
+}
+func (UnimplementedCatalogServiceServer) CheckStock(grpc.BidiStreamingServer[CheckStockRequest, CheckStockResponse]) error {
+	return status.Error(codes.Unimplemented, "method CheckStock not implemented")
 }
 func (UnimplementedCatalogServiceServer) mustEmbedUnimplementedCatalogServiceServer() {}
 func (UnimplementedCatalogServiceServer) testEmbeddedByValue()                        {}
@@ -104,6 +167,31 @@ func _CatalogService_GetProduct_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CatalogService_ListProducts_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ListProductsRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(CatalogServiceServer).ListProducts(m, &grpc.GenericServerStream[ListProductsRequest, ListProductsResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CatalogService_ListProductsServer = grpc.ServerStreamingServer[ListProductsResponse]
+
+func _CatalogService_UpdateInventory_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CatalogServiceServer).UpdateInventory(&grpc.GenericServerStream[UpdateInventoryRequest, UpdateInventoryResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CatalogService_UpdateInventoryServer = grpc.ClientStreamingServer[UpdateInventoryRequest, UpdateInventoryResponse]
+
+func _CatalogService_CheckStock_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CatalogServiceServer).CheckStock(&grpc.GenericServerStream[CheckStockRequest, CheckStockResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CatalogService_CheckStockServer = grpc.BidiStreamingServer[CheckStockRequest, CheckStockResponse]
+
 // CatalogService_ServiceDesc is the grpc.ServiceDesc for CatalogService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -116,6 +204,23 @@ var CatalogService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _CatalogService_GetProduct_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ListProducts",
+			Handler:       _CatalogService_ListProducts_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "UpdateInventory",
+			Handler:       _CatalogService_UpdateInventory_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "CheckStock",
+			Handler:       _CatalogService_CheckStock_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "catalog/catalog.proto",
 }

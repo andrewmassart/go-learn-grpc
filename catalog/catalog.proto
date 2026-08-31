@@ -6,6 +6,9 @@ option go_package = "github.com/andrewmassart/go-learn-grpc/catalog";
 
 service CatalogService {
   rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+  rpc ListProducts(ListProductsRequest) returns (stream ListProductsResponse);
+  rpc UpdateInventory(stream UpdateInventoryRequest) returns (UpdateInventoryResponse);
+  rpc CheckStock(stream CheckStockRequest) returns (stream CheckStockResponse);
 }
 
 message GetProductRequest {
@@ -14,6 +17,30 @@ message GetProductRequest {
 
 message GetProductResponse {
   Product product = 1;
+}
+
+message ListProductsRequest {}
+
+message ListProductsResponse {
+  Product product = 1;
+}
+
+message UpdateInventoryRequest {
+  string sku = 1;
+  int64 quantity = 2;
+}
+
+message UpdateInventoryResponse {
+  int64 total_units = 1;
+}
+
+message CheckStockRequest {
+  string sku = 1;
+}
+
+message CheckStockResponse {
+  string sku = 1;
+  int64 quantity = 2;
 }
 
 message Product {

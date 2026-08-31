@@ -14,3 +14,4 @@ Run a chapter:
 | # | Chapter | Concepts |
 |---|---------|----------|
 | 01 | [unary](examples/c01-unary) | Proto contract, codegen, unary RPC |
+| 02 | [streaming](examples/c02-streaming) | Server, client, and bidirectional streaming |
