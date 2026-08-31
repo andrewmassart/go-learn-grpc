@@ -99,17 +99,16 @@ func (c *catalogServiceClient) CheckStock(ctx context.Context, opts ...grpc.Call
 type CatalogService_CheckStockClient = grpc.BidiStreamingClient[CheckStockRequest, CheckStockResponse]
 
 // CatalogServiceServer is the server API for CatalogService service.
-// All implementations must embed UnimplementedCatalogServiceServer
+// All implementations should embed UnimplementedCatalogServiceServer
 // for forward compatibility.
 type CatalogServiceServer interface {
 	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
 	ListProducts(*ListProductsRequest, grpc.ServerStreamingServer[ListProductsResponse]) error
 	UpdateInventory(grpc.ClientStreamingServer[UpdateInventoryRequest, UpdateInventoryResponse]) error
 	CheckStock(grpc.BidiStreamingServer[CheckStockRequest, CheckStockResponse]) error
-	mustEmbedUnimplementedCatalogServiceServer()
 }
 
-// UnimplementedCatalogServiceServer must be embedded to have
+// UnimplementedCatalogServiceServer should be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
@@ -128,8 +127,7 @@ func (UnimplementedCatalogServiceServer) UpdateInventory(grpc.ClientStreamingSer
 func (UnimplementedCatalogServiceServer) CheckStock(grpc.BidiStreamingServer[CheckStockRequest, CheckStockResponse]) error {
 	return status.Error(codes.Unimplemented, "method CheckStock not implemented")
 }
-func (UnimplementedCatalogServiceServer) mustEmbedUnimplementedCatalogServiceServer() {}
-func (UnimplementedCatalogServiceServer) testEmbeddedByValue()                        {}
+func (UnimplementedCatalogServiceServer) testEmbeddedByValue() {}
 
 // UnsafeCatalogServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to CatalogServiceServer will
