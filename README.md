@@ -16,3 +16,4 @@ Run a chapter:
 | 01 | [unary](examples/c01-unary) | Proto contract, codegen, unary RPC |
 | 02 | [streaming](examples/c02-streaming) | Server, client, and bidirectional streaming |
 | 03 | [errors](examples/c03-errors) | Status codes, error handling, deadlines |
+| 04 | [interceptors](examples/c04-interceptors) | Unary interceptors, chaining, metadata auth |
